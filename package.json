@@ -1,0 +1,16 @@
+{
+  "name": "opc-quotation-card",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/model.test.mjs",
+    "build": "node scripts/build.mjs",
+    "serve": "node scripts/serve.mjs --root dist --port 4173",
+    "verify": "npm run test && npm run build",
+    "e2e": "node --test tests/e2e.test.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

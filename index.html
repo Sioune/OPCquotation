@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OPC 报价卡</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">OPC</span>
+        <div>
+          <h1>OPC 报价卡</h1>
+          <p>需求编号 <strong>#20260509-0087</strong></p>
+        </div>
+      </div>
+      <nav class="tabs" aria-label="视图切换">
+        <button class="tab is-active" type="button" data-tab="quote">报价填报</button>
+        <button class="tab" type="button" data-tab="compare">买家对比</button>
+        <button class="tab" type="button" data-tab="rules">规则说明</button>
+      </nav>
+      <div class="top-actions">
+        <button class="button secondary" type="button" id="resetDraft">重置</button>
+        <button class="button secondary" type="button" id="saveDraft">保存草稿</button>
+        <button class="button primary" type="button" id="submitQuote">提交报价</button>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="view is-active" data-view="quote">
+        <form class="quote-grid" id="quoteForm">
+          <div class="form-column">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="step">01</span>
+                  <h2>基准层</h2>
+                </div>
+                <output id="baseSubtotal">15,000 元</output>
+              </div>
+              <div class="rows" id="baseRows"></div>
+              <div class="calibration">
+                <label for="baseAdjustment">OPC 自主微调</label>
+                <div class="range-line">
+                  <input id="baseAdjustment" type="range" min="-20" max="20" value="0" step="1" />
+                  <input id="baseAdjustmentNumber" type="number" min="-20" max="20" value="0" step="1" />
+                  <span>%</span>
+                </div>
+                <textarea id="adjustmentReason" rows="3" placeholder="非 0% 时填写微调原因"></textarea>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="step">02</span>
+                  <h2>调整层</h2>
+                </div>
+                <output id="factorProduct">×0.99</output>
+              </div>
+              <div class="rows" id="coefficientRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <span class="step">03</span>
+                  <h2>可选层</h2>
+                </div>
+                <output id="optionalSubtotal">+2,228 元</output>
+              </div>
+
+              <div class="option-block">
+                <div class="option-title">
+                  <h3>维护包</h3>
+                  <output id="maintenanceFee">+2,228 元</output>
+                </div>
+                <div class="segmented wide" id="maintenanceOptions"></div>
+              </div>
+
+              <div class="option-grid">
+                <label class="toggle-row">
+                  <input id="escrowEnabled" type="checkbox" checked />
+                  <span>交付保证金</span>
+                </label>
+                <div class="compact-control">
+                  <select id="escrowRate" aria-label="保证金比例">
+                    <option value="0.1">10%</option>
+                    <option value="0.15" selected>15%</option>
+                    <option value="0.2">20%</option>
+                  </select>
+                  <output id="escrowAmount">托管 2,562 元</output>
+                </div>
+              </div>
+
+              <div class="option-grid">
+                <label class="toggle-row">
+                  <input id="milestoneEnabled" type="checkbox" />
+                  <span>里程碑奖金</span>
+                </label>
+                <div class="compact-control">
+                  <input id="milestoneRate" type="number" min="10" max="30" value="15" step="1" aria-label="里程碑奖金比例" />
+                  <span>%</span>
+                  <output id="milestonePotential">达成后 +2,562 元</output>
+                </div>
+              </div>
+
+              <div class="option-grid">
+                <label class="toggle-row">
+                  <input id="revenueShareEnabled" type="checkbox" />
+                  <span>收入分成</span>
+                </label>
+                <div class="compact-control">
+                  <input id="revenueShareRate" type="number" min="3" max="10" value="5" step="1" aria-label="收入分成比例" />
+                  <span>%</span>
+                  <select id="revenueShareMonths" aria-label="分成周期">
+                    <option value="12">12 个月</option>
+                    <option value="18">18 个月</option>
+                    <option value="24">24 个月</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="summary">
+            <section class="receipt">
+              <div class="receipt-head">
+                <span>最终报价</span>
+                <strong id="finalPrice">17,078 元</strong>
+              </div>
+              <dl class="money-list">
+                <div>
+                  <dt>基准层</dt>
+                  <dd id="receiptBase">15,000 元</dd>
+                </div>
+                <div>
+                  <dt>微调后基准</dt>
+                  <dd id="receiptCalibratedBase">15,000 元</dd>
+                </div>
+                <div>
+                  <dt>调整后价格</dt>
+                  <dd id="receiptAdjusted">14,850 元</dd>
+                </div>
+                <div>
+                  <dt>维护费用</dt>
+                  <dd id="receiptMaintenance">2,228 元</dd>
+                </div>
+              </dl>
+              <div class="meta-grid">
+                <label>
+                  <span>交付周期</span>
+                  <input id="deliveryWeeks" type="number" min="1" max="52" value="3" step="1" />
+                </label>
+                <label>
+                  <span>信任档案</span>
+                  <select id="trustScore">
+                    <option value="2">★★☆☆☆</option>
+                    <option value="3" selected>★★★☆☆</option>
+                    <option value="4">★★★★☆</option>
+                    <option value="5">★★★★★</option>
+                  </select>
+                </label>
+              </div>
+              <div class="summary-strip">
+                <div>
+                  <span>质保</span>
+                  <strong id="warrantyMonths">3 个月</strong>
+                </div>
+                <div>
+                  <span>保证金</span>
+                  <strong id="receiptEscrow">2,562 元</strong>
+                </div>
+                <div>
+                  <span>推荐度</span>
+                  <strong id="recommendationDots">●●●●○</strong>
+                </div>
+              </div>
+              <pre id="structuredSummary" aria-label="结构化报价摘要"></pre>
+            </section>
+          </aside>
+        </form>
+      </section>
+
+      <section class="view" data-view="compare">
+        <section class="panel compare-panel">
+          <div class="panel-head">
+            <div>
+              <span class="step">BUY</span>
+              <h2>买家对比表</h2>
+            </div>
+            <span id="quoteCount">共收到 3 份报价</span>
+          </div>
+          <div class="table-wrap">
+            <table class="compare-table" id="compareTable"></table>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view="rules">
+        <section class="rules-layout">
+          <article class="panel copy-panel">
+            <div class="panel-head">
+              <div>
+                <span class="step">TALK</span>
+                <h2>客户话术</h2>
+              </div>
+            </div>
+            <p class="lead">我们不按“写代码的小时数”收费。我们按要交付什么规模的系统、在什么不确定性下、承担多长时间的责任来定价。</p>
+            <p>传统外包常用“人工时 × 单价”，但 AI 让代码产出效率不再稳定代表工作价值。三层报价法把范围、风险与关系拆开，让买家看到每一分钱买到的内容。</p>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="step">EDGE</span>
+                <h2>适用边界</h2>
+              </div>
+            </div>
+            <ul class="edge-list">
+              <li>极短交付微任务走固定价。</li>
+              <li>纯咨询或方案设计另建 SKU。</li>
+              <li>长期驻场按周或月包处理。</li>
+              <li>新手 OPC 默认带交付保证金。</li>
+            </ul>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="./src/app.mjs"></script>
+  </body>
+</html>
